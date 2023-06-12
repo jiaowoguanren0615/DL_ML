@@ -8,7 +8,6 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 epochs = 5
 lr = 0.001
 weight_decay = 0.001
-save_path = './Vit_weights.pth'
 
 data_transform = {
     'train': transforms.Compose([transforms.RandomResizedCrop(224), transforms.ToTensor(),
