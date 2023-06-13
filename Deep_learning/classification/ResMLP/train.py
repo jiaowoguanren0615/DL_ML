@@ -45,6 +45,10 @@ def main(args):
 
 
     model = net(num_classes=args.num_classes).to(device)
+    
+    """
+    如果要使用迁移学习，调用预训练权重，则需要使用model.reset_classifier(num_classes=args.num_classes)
+    """
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=weight_decay)
     lr_scheduler = StepLR(optimizer, step_size=1, gamma=0.33)
