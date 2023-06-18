@@ -2,7 +2,7 @@
 
 This method only works for linux system, do not use it in windows
 
-launch command: accelerate launch my_script.py
+launch command: accelerate launch demo.py
 
 """
 
