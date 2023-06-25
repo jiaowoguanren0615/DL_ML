@@ -49,7 +49,7 @@ def main(args):
 
     model = EfficientViT_M0(num_classes=args.num_classes).to(args.device)
 
-    # TODO You should download the weights file if you want to load pretrain weights, which the websites were written in model file
+    # TODO You should download the weights file if you want to load pretrain weights, which the websites were written in model.py file
     # if args.weights != "":
     #     assert os.path.exists(args.weights), "weights file: '{}' not exist.".format(args.weights)
     #     weights_dict = torch.load(args.weights, map_location=args.device)["model"]
