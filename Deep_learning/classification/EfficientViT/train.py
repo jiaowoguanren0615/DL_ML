@@ -73,9 +73,9 @@ def main(args):
 
     scalar = torch.cuda.amp.GradScaler() if args.scalar else None
 
-    resume = os.path.exists(f'./GhostNet/model.pth')
+    resume = os.path.exists(f'./EfficientViT/model.pth')
     if resume:
-        path_checkpoint = f"./GhostNet/model.pth"  # 断点路径
+        path_checkpoint = f"./EfficientViT/model.pth"  # 断点路径
         checkpoint = torch.load(path_checkpoint)  # 加载断点
 
         model.load_state_dict(checkpoint['model'])  # 加载模型可学习参数
