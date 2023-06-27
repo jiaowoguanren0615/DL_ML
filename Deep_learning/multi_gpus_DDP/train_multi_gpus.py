@@ -1,3 +1,14 @@
+"""
+launch command:
+if you want to use all gpus, than run command 1
+<1> python -m torch.distributed.launch --nproc_per_node=2 --use_env train_multi_gpu_using_launch.py
+
+
+if you want to use specific gpus, than run command 2
+<2> CUDA_VISIBLE_DEVICES=0,3 python -m torch.distributed.launch --nproc_per_node=2 --use_env train_multi_gpu_using_launch.py
+
+"""
+
 import os
 import math
 import tempfile
