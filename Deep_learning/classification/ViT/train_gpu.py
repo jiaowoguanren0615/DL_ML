@@ -1,0 +1,72 @@
+from model import vit_base_patch16_224 as make_model
+from config import save_path, batch_size, weight_decay, lr, data_transform, device, root, epochs
+from my_dataset import MyDataset
+from torch.utils.data import DataLoader
+from split_data import read_split_data
+import torch, os, sys
+import torch.nn as nn
+from tqdm import tqdm
+
+
+def train(net, batch_size, lr, weight_decay, epochs, save_path):
+    best_val_acc = 0
+
+    train_image_path, train_image_label, val_image_path, val_image_label, class_indices = read_split_data(root)
+    train_dataset = MyDataset(train_image_path, train_image_label, data_transform['train'])
+    train_num = len(train_dataset)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=0,
+                              collate_fn=train_dataset.collate_fn)
+
+    valid_dataset = MyDataset(val_image_path, val_image_label, data_transform['valid'])
+    valid_num = len(valid_dataset)
+    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=False, num_workers=0,
+                              collate_fn=valid_dataset.collate_fn)
+
+    optimizer = torch.optim.Adam(net.parameters(), lr=lr, weight_decay=weight_decay)
+    loss_function = nn.CrossEntropyLoss()
+
+    for epoch in range(epochs):
+        running_loss, train_acc, val_acc = 0, 0, 0
+
+        net.train()
+        train_bar = tqdm(train_loader, file=sys.stdout, colour='red')
+        for step, data in enumerate(train_bar):
+            images, labels = data
+            images, labels = images.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = net(images)
+            loss = loss_function(outputs, labels)
+            running_loss += loss.item()
+            train_acc += (torch.argmax(outputs, dim=1) == labels).sum().item()
+            loss.backward()
+            optimizer.step()
+            train_bar.desc = f'train epoch [{epoch+1}/{epochs}] train_loss: {loss.item():.3f}'
+
+        net.eval()
+        with torch.no_grad():
+            val_bar = tqdm(valid_loader, file=sys.stdout, colour='red')
+            for data in val_bar:
+                images, labels = data
+                images, labels = images.to(device), labels.to(device)
+                outputs = net(images)
+                val_acc += (torch.argmax(outputs, dim=1) == labels).sum().item()
+
+        train_accuracy = train_acc / train_num
+        val_accuracy = val_acc / valid_num
+        train_loss = running_loss / train_num
+
+        if val_accuracy > best_val_acc:
+            best_val_acc = val_accuracy
+            torch.save(net.state_dict(), save_path)
+
+        print(f'epoch [{epoch+1}/{epochs}], train_loss: {train_loss:.3f}, train_accuracy: {train_accuracy:.3f}, valid_accuracy: {val_accuracy:.3f}')
+
+    print('Finished Training!!!')
+
+
+if __name__ == '__main__':
+    net = make_model(num_classes=5).to(device)
+    if os.path.exists(save_path):
+        print('----------------------------LoadingModel----------------------------')
+        net.load_state_dict(torch.load(save_path), strict=False)
+    train(net=net, batch_size=batch_size, lr=lr, weight_decay=weight_decay, epochs=epochs, save_path=save_path)
