@@ -1,3 +1,6 @@
+"""
+!pip install flaml
+"""
 from sklearn.model_selection import train_test_split
 from flaml import AutoML
 from sklearn.datasets import load_breast_cancer
