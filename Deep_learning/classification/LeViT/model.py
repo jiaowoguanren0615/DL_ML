@@ -379,6 +379,8 @@ class LeViT(torch.nn.Module):
         x = self.blocks(x)
         x = x.mean(1)
         if self.distillation:
+            # if use the distillation, the output shape will be a tuple, it seems like: (a, b)
+            # a is the output of self.head(x), and b is the output of self.head_dist(x)
             x = self.head(x), self.head_dist(x)
             if not self.training:
                 x = (x[0] + x[1]) / 2
