@@ -34,6 +34,7 @@ class Model():
     def __init__(self,
                  data_root,
                  target_name,
+                 drop_columns=None,
                  model_name=None,
                  norm=None,
                  data_reduction=False,
@@ -45,6 +46,7 @@ class Model():
         """
         :param data_root: Your data root path
         :param target_name: The target column's name in your data file
+        :param drop_columns: Choose the column what you want to drop in raw data (type: list) eg:['A', 'B'] or ['A']
         :param model_name: Choose your model
         :param norm: Choose your data Pre-process idea
         :param data_reduction: Use data_reduction (eg: PCA)
@@ -60,6 +62,7 @@ class Model():
 
         self.target_name = target_name
         self.model_name = model_name
+        self.drop_columns = drop_columns
         self.norm = norm
         self.data_reduction = data_reduction
         self.plot_every_class_distribution = plot_every_class_distribution
@@ -74,10 +77,10 @@ class Model():
             dfMerge = pd.read_csv(self.root)
         elif re.findall('.txt', self.root):
             dfMerge = pd.read_table(self.root)
-        elif re.findall('.xlsx', self.root):
+        elif re.findall('.xlsx|.xls', self.root):
             dfMerge = pd.read_excel(self.root)
         else:
-            pass
+            raise ValueError('Your file does not belongs to one of csv txt xlsx, please modify the process reading data by yourself')
 
         classes = dfMerge[self.target_name].unique()
         self.target_dict = {k: v for k, v in enumerate(classes)}
@@ -89,8 +92,8 @@ class Model():
 
         dfMerge[self.target_name] = dfMerge[self.target_name].map(class_indices)
 
-        # TODO 删除ID列是因为原表中除了特征和target之外，有一个多余的ID列，如果自己的数据集中只有特征和target，则需要把下面这行代码注释
-        dfMerge = dfMerge.drop(['id'], axis=1)
+        if self.drop_columns is not None:
+            dfMerge = dfMerge.drop(self.drop_columns, axis=1)
 
         every_class_num = []
         for colName in dfMerge[self.target_name].unique():
@@ -267,5 +270,5 @@ class Model():
 
 
 if __name__ == '__main__':
-    model = Model(data_root='./breast-cancer.csv', target_name='diagnosis', model_name='LGBM', norm=StandardScaler())
+    model = Model(data_root='./breast-cancer.csv', target_name='diagnosis', drop_columns=['id'], model_name='LGBM', norm=StandardScaler())
     model.run()
