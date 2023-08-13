@@ -32,6 +32,7 @@ class Model():
     def __init__(self,
                  data_root,
                  target_name,
+                 drop_columns=None,
                  model_name=None,
                  norm=None,
                  data_reduction=False,
@@ -43,6 +44,7 @@ class Model():
         """
         :param data_root: Your data root path
         :param target_name: The target column's name in your data file
+        :param drop_columns: Choose the column what you want to drop in raw data (type: list) eg:['A', 'B'] or ['A']
         :param model_name: Choose your model
         :param norm: Choose your data Pre-process idea
         :param data_reduction: Use data_reduction (eg: PCA)
@@ -58,6 +60,7 @@ class Model():
 
         self.target_name = target_name
         self.model_name = model_name
+        self.drop_columns = drop_columns
         self.norm = norm
         self.data_reduction = data_reduction
         self.plot_every_class_distribution = plot_every_class_distribution
@@ -72,10 +75,10 @@ class Model():
             dfMerge = pd.read_csv(self.root)
         elif re.findall('.txt', self.root):
             dfMerge = pd.read_table(self.root)
-        elif re.findall('.xlsx', self.root):
+        elif re.findall('.xlsx|.xls', self.root):
             dfMerge = pd.read_excel(self.root)
         else:
-            pass
+            raise ValueError('Your file does not belongs to one of csv txt xlsx, please modify the process reading data by yourself')
 
         classes = dfMerge[self.target_name].unique()
         self.target_dict = {k: v for k, v in enumerate(classes)}
@@ -87,6 +90,8 @@ class Model():
 
         dfMerge[self.target_name] = dfMerge[self.target_name].map(class_indices)
 
+        if self.drop_columns is not None:
+            dfMerge = dfMerge.drop(self.drop_columns, axis=1)
 
         every_class_num = []
         for colName in dfMerge[self.target_name].unique():
@@ -288,5 +293,5 @@ class Model():
 
 
 if __name__ == '__main__':
-    model = Model(data_root='./milknew.csv', target_name='Grade', model_name='LGBM', norm=StandardScaler())
+    model = Model(data_root='./milknew.csv', target_name='Grade', drop_columns=None, model_name='LGBM', norm=StandardScaler())
     model.run()
