@@ -31,7 +31,7 @@
 ## 3. Deep_learning项目内包含图像分类、语义分割、DDP单机多卡运行代码。
     (1)具体GPU资源占用情况都有备注，根据自身实际情况调整参数即可.
     (2)项目中的自动混合精度是默认开启的，如果自己的GPU不支持自动混合精度，需要把参数设置为False.
-    (3)判断自己的GPU是否支持混合精度可以去https://docs.nvidia.com/deeplearning/tensorrt/support-matrix/index.html#hardware-precision-matrix.
+    (3)判断自己的GPU是否支持混合精度运行torch.cuda.is_bf16_supported()，返回为True则表示支持.
     (4)如果开启自动混合精度，但是内存(显存)占用变高，则可以在训练过程代码(一般在utils.py文件下)中把"with torch.cuda.amp.autocast()"修改为"with torch.cuda.amp.autocast(cache_enabled=False)".
 
 
